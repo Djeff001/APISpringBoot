@@ -6,7 +6,10 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import springboot.api.model.Gender;
 import springboot.api.utils.Constantes;
+
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -17,16 +20,11 @@ public class UserDto {
     private String name;
     @NotNull(message = Constantes.NOT_NULL)
     @JsonFormat(pattern="d/MM/yyyy")
-    private String birthdate;
+    private LocalDate birthdate;
     @NotNull(message = Constantes.NOT_NULL)
     private String country;
     @Pattern(regexp = "(\\+33|0033|0)[0-9]{9}", message = Constantes.NOT_VALID)
     private String phone;
-    private String gender;
+    private Gender gender;
 
-    public UserDto( String name, String birthdate, String country) {
-        this.name = name;
-        this.birthdate = birthdate;
-        this.country = country;
-    }
 }
