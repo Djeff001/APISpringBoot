@@ -9,11 +9,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import springboot.api.converter.UserConverter;
 import springboot.api.dto.UserDto;
 import springboot.api.exception.FunctionalException;
+import springboot.api.model.Gender;
 import springboot.api.model.User;
 import springboot.api.repository.UserDao;
-import springboot.api.service.impl.UserServiceImpl;
 import springboot.api.utils.Constantes;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -22,7 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-
 class UserServiceTest {
 
     @Mock
@@ -32,8 +33,11 @@ class UserServiceTest {
     UserDto userDto;
     @BeforeEach
     void setUp() {
-        underTest = new UserServiceImpl(userDao);
-        userDto = new UserDto("toto","01/01/2000","France");
+        underTest = new UserService(userDao);
+        userDto = new UserDto();
+        userDto.setName( "toto" );
+        userDto.setCountry( "France" );
+        userDto.setBirthdate( LocalDate.parse( "01/01/2000", Constantes.formatter ) );
     }
 
     @Test
@@ -57,7 +61,7 @@ class UserServiceTest {
         // Given
         Long userId = 1L;
         userDto.setPhone( "+33123456789" );
-        userDto.setGender( "MALE" );
+        userDto.setGender( Gender.MALE );
         User user = UserConverter.getUserFromUserDto( userDto );
         user.setId( userId );
         // When
@@ -84,7 +88,7 @@ class UserServiceTest {
     @Test
     void createUser_will_Throw_When_User_NotAdult() {
         // Given
-        userDto.setBirthdate( "01/06/2005" );
+        userDto.setBirthdate( LocalDate.parse( "01/06/2015", Constantes.formatter ));
         // When
         // then
         assertThatThrownBy(()->underTest.createUser(userDto))
@@ -96,7 +100,8 @@ class UserServiceTest {
     @Test
     void createUser_will_Throw_When_Birthdate_Not_Valid() {
         // Given
-        userDto.setBirthdate( "01.06.2005" );
+
+        userDto.setBirthdate( LocalDate.parse( "01-12-2000", DateTimeFormatter.ofPattern( "d-MM-yyyy" ) ) );
         // When
         // then
         assertThatThrownBy(()->underTest.createUser(userDto))
@@ -109,8 +114,8 @@ class UserServiceTest {
     void findById_Should_Find_User_By_Id() throws FunctionalException {
         // Given
         Long userId = 1L;
+        userDto.setId( userId );
         User user = UserConverter.getUserFromUserDto( userDto );
-        user.setId( userId );
 
         //  when
         when( userDao.findById( userId) ).thenReturn( Optional.of( user ) );
